@@ -95,7 +95,7 @@ class spd:
         self.data_nozerodm = dd['Data_nozerodm']
         self.data_nozerodm_dedisp = dd['Data_dedisp_nozerodm']
          
-        self.spfiles = dd['singlepulse_files']
+        #self.spfiles = dd['singlepulse_files']
         self.dmVt_this_dms = dd['dm_arr']
         self.dmVt_this_times = _np.array(dd['time_list'])
         self.dmVt_this_sigmas = dd['sigma_arr']
