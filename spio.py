@@ -9,9 +9,7 @@ def read_sp_files(files):
     data = _np.loadtxt(finput,
                        dtype=_np.dtype([('dm', 'float32'),
                                         ('sigma','float32'),
-                                        ('time','float32'),
-                                        ('sample','uint32'),
-                                        ('downfact','uint8')]))
+                                        ('time','float32')]))
     return _np.atleast_2d(data)
 
 def read_tarfile(filenames, names, tar):
@@ -49,7 +47,7 @@ def read_tarfile(filenames, names, tar):
     main_array[3] = main_array[3].astype(_np.int)
     main_array[4] = main_array[4].astype(_np.int)
     return main_array
-def gen_arrays(dm, threshold, sp_files, tar):    
+def gen_arrays(dm, sp_files, tar, threshold):    
     """
     Extract dms, times and signal to noise from each singlepulse file as 1D arrays.
     Input: 
@@ -65,7 +63,7 @@ def gen_arrays(dm, threshold, sp_files, tar):
     """
     max_dm = _np.ceil(_np.max(dm)).astype('int')
     min_dm = _np.min(dm).astype('int')
-    diff_dm = max_dm-min_dm
+    diff_dm = (max_dm-min_dm)/2 
     ddm = min_dm-diff_dm
     if (ddm <= 0):
         ddm = 0
@@ -76,7 +74,7 @@ def gen_arrays(dm, threshold, sp_files, tar):
     dm_time_files = []
     for i in range(ddm,(max_dm+diff_dm)):
         """after DM of 1826 the dm step size is >=1, therefore we need to pick the correct DMs."""
-        if (i >= 1826) and (i < 3266):
+        if (i >= 3000) and (i < 3266): #changed to 3000 because GBNCC never has a step size >1. 
             if int(i)%2 == 1:
                 i = i+1
             try:
@@ -130,7 +128,7 @@ def gen_arrays(dm, threshold, sp_files, tar):
                     data = read_sp_files(singlepulsefiles)[0]
             except:
                 pass
-        if tar is not None:
+	if tar is not None:
             dms = _np.reshape(data[0],(len(data[0]),))
             times = _np.reshape(data[2],(len(data[1]),))
             sigmas = _np.reshape(data[1],(len(data[2]),))
@@ -158,8 +156,8 @@ def read_spd(spd_file, tar = None):
        Output: An object that has all the relevant information to remake the plot. 
     """
     sp = spd(spd_file)
-    if tar is not None:
-        dmVt_dms, dmVt_times, dmVt_sigmas, dmVt_files = gen_arrays(sp.dmVt_this_dms, threshold = 5, sp.spfiles, tar)
+    if tar:
+        dmVt_dms, dmVt_times, dmVt_sigmas, dmVt_files = gen_arrays(sp.dmVt_this_dms, sp.spfiles, tar, threshold=5.0)
         sp.dmVt_dms = dmVt_dms
         sp.dmVt_times = dmVt_times
         sp.dmVt_sigmas = dmVt_sigmas
